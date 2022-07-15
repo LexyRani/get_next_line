@@ -6,7 +6,7 @@
 /*   By: aceralin <aceralin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/07/05 15:07:11 by aceralin          #+#    #+#             */
-/*   Updated: 2022/07/14 23:53:06 by aceralin         ###   ########.fr       */
+/*   Updated: 2022/07/15 14:25:53 by aceralin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,18 @@
 
 
 int	found_new_line (char *buffer)
+{
+	int	i;
+	
+	i = 0;
+	while(buffer[i])
+	{
+		if(buffer[i] == '\n')
+			return(1);
+		i ++;
+	}
+	return(0);
+}
 
 /*qui va chercher dans le buffer si il y a un \n
 
@@ -39,7 +51,7 @@ char	*get_next_line (int fd)
 	size_t	count;
 	
 	if( (fd < 0) || BUFFER_SIZE <= 0)
-		return('NULL');
+		return(NULL);
 	buffer = malloc(sizeof(char)* (BUFFER_SIZE + 1));
 	if (!buffer)
 		return(0);
