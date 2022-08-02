@@ -6,7 +6,7 @@
 /*   By: aceralin <aceralin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/07/11 15:06:14 by aceralin          #+#    #+#             */
-/*   Updated: 2022/07/15 14:34:19 by aceralin         ###   ########.fr       */
+/*   Updated: 2022/08/02 16:40:52 by aceralin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,18 @@ size_t	ft_strlen(const char *s)
 	while (s[i] != '\0')
 		i++;
 	return (i);
+}
+
+char	*ft_strchr(const char *s, int c)
+{
+	int	i;
+
+	i = 0;
+	while (s[i] != '\0' && s[i] != (char)c)
+		i++;
+	if (s[i] == (char) c)
+		return ((char *)(s + i));
+	return (0);
 }
 
 char	*ft_strdup(const char *s)
