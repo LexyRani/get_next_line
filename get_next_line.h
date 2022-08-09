@@ -6,7 +6,7 @@
 /*   By: aceralin <aceralin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/07/11 15:06:24 by aceralin          #+#    #+#             */
-/*   Updated: 2022/08/02 18:32:21 by aceralin         ###   ########.fr       */
+/*   Updated: 2022/08/04 15:29:57 by aceralin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 
 // Buffer
 #ifndef BUFFER_SIZE
-#define BUFFER_SIZE 10
+#define BUFFER_SIZE 5
 #endif
 
 // Main

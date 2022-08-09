@@ -1,28 +1,63 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   get_next_line.c                                    :+:      :+:    :+:   */
+/*   get_next_line_new.c                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: aceralin <aceralin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2022/07/05 15:07:11 by aceralin          #+#    #+#             */
-/*   Updated: 2022/08/02 19:46:30 by aceralin         ###   ########.fr       */
+/*   Created: 2022/08/04 14:35:42 by aceralin          #+#    #+#             */
+/*   Updated: 2022/08/09 21:24:46 by aceralin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
 
 #include <stdio.h>
 #include <stdlib.h>
 #include "get_next_line.h"
 #include <limits.h>
 
-// Fonction qui trouve s'il y a ou non un \n a fin la ligne
-//qui va chercher dans le buffer si il y a un \n
-//return 1 si il trouve et 0 si il ne trouve pas
+char *keep_before_new_line(char *line_read)
+{
+	char *tmp;
+	int i;
+	
+	tmp = malloc( sizeof (char) * (ft_strlen(line_read)));
+	i = 0;
+	while(line_read[i] != '\n' && line_read[i] != '\0')
+	{
+		tmp[i] = line_read[i];  
+		i++;
+	}
+	return(tmp);
+} 
+char * copy_after_new_line(char *buffer)
+{
+	int	i ;
+	int j ;
+	char *word;
+	
+	word = malloc( sizeof(char) * (BUFFER_SIZE + 1));
+	if (!word)
+		return(0);
+	i = 0;
+	j = 0;
+	while(buffer[i] && buffer [i] != '\n' )
+		i++;
+	if( buffer[i] && buffer[i] == '\n')
+		i++;
+	while (buffer[i] )
+	{
+		word[j] = buffer [i];
+		i++; 
+		j++;	
+	}
+	word[i] = '\0';
+	return(word);
+}
 
 int	found_new_line(char *buffer)
 {
 	int	i;
-	//printf(" ici 4\n");
 	i = 0;
 	while (buffer[i])
 	{
@@ -35,69 +70,78 @@ int	found_new_line(char *buffer)
 
 char	*ft_copy_and_stick(char *buffer, char *line_read)
 {	
-	static char	*tmp;
-	int	new_line;
-	char *tmp1;
-	//printf(" buffer 1: %s\n", buffer);
-	printf(" ici 3 \n");
+	char	*tmp;
+	
+	
 	if (line_read == NULL )
-		line_read = ft_strdup(buffer);
-	tmp = ft_strdup(buffer); //duplique le buffer dqns la variable statique 
-	printf("line_read : %s\n", line_read);
-	if(ft_strchr(tmp,'\n') != NULL)
 	{
-		tmp1 = ft_strchr(tmp1, '\n');
-		new_line = buffer - (ft_strchr(buffer , '\n'));
+		line_read = ft_strdup(buffer);	
+		return(line_read);
 	}
-	line_read = ft_strjoin(line_read, tmp1);
+	tmp = ft_strdup(buffer);
+	line_read = ft_strjoin(line_read, tmp);
+	
 	return (line_read);
 }
-
-
+	
 char	*get_next_line(int fd)
 {
-	char	*line_read;
-	void	*buffer;
+    char	*line_read;
+	static char	*buffer;
 	size_t	count;
-
-	printf(" ici\n");
-	if ((fd < 0) || BUFFER_SIZE <= 0 || read(fd, buffer, 0) < 0) //probleme dans la lecture du fichier (fichier illisible)
+	
+	if ((fd < 0) || BUFFER_SIZE <= 0  || read(fd, buffer, 0) < 0)
 		return (NULL);
-	buffer = malloc(sizeof(char) * (BUFFER_SIZE + 1));
+	if(buffer == NULL)
+		buffer = malloc(sizeof(char) * (BUFFER_SIZE + 1));
 	if (!buffer)
 		return (0);
 	line_read = NULL;
-	while (found_new_line(buffer) == 0) // tant que dans le buffer on netrouve pas de \n 
+	if(found_new_line (buffer) == 1)
 	{
-		printf("\nici 2 \n");
-		read (fd, buffer, BUFFER_SIZE);//lire puis stocker dans le buffer
-		line_read = ft_copy_and_stick(buffer, line_read);//fonction qui va copier ce qu'il y a dans buffer strdup + strjoin
-		printf("coucoula %s \n", (char * )buffer);
-		printf("coucou %s \n", line_read);
-		// sinon separer la ligne et retourner la string
-		// apres \n  on recommence le processus
-	}
-	printf("%s", (char *)buffer);
-	printf("\n derniere ligne :%s\n", line_read);
-	//si le buffer contient \n alors on doit separer
-	return (line_read);
+		line_read = copy_after_new_line(buffer);
+	
+		buffer = ft_strdup(line_read);
+	}	
+    while (found_new_line(buffer) == 0)
+	{
+		
+		count = read(fd, buffer, BUFFER_SIZE);
+		if (count == 0)
+			return(line_read);
+        buffer[count + 1 ] = '\0';
+        line_read = ft_copy_and_stick(buffer, line_read); 
+		if (line_read == NULL)
+		{
+			free(buffer);
+			return(NULL);
+		}
+    }
+	line_read = keep_before_new_line(line_read);
+	return (line_read); 
 }
 
 int	main()
 {
-	char fd;
-	fd = open("text.txt", O_RDONLY);
-	//printf("%d\n", FOPEN_MAX);
+	int fd;
+    char *result;
+	fd = open("jojo", O_RDONLY);
+	int i;	
+	i = 0; 
 
-	// /!\ appeler getnextline une ligne apres l'autre
-	//while (1)
-	//{
-		get_next_line(fd);
-		if(get_next_line(fd) == NULL)
-			return(0);
-		
-		printf("Par la: %s",get_next_line(fd));
-		free(get_next_line(fd));
-	//}	
+	
+	while (i != 10)
+	{
+		result = get_next_line(fd);
+		printf("\nResultat final: %s\n",result);
+		free(result);
+		i++;
+	}	
 	return(0);
+	//result = get_next_line(fd);
+		
+	//printf("Par la: %s",get_next_line(fd));
+	//free(result);
+	//}	
+	//return(0);
 }
