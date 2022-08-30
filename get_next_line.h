@@ -5,34 +5,38 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: aceralin <aceralin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2022/07/11 15:06:24 by aceralin          #+#    #+#             */
-/*   Updated: 2022/08/04 15:29:57 by aceralin         ###   ########.fr       */
+/*   Created: 2022/08/24 17:34:39 by aceralin          #+#    #+#             */
+/*   Updated: 2022/08/30 19:08:34 by aceralin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef GET_NEXT_LINE_H
-#define GET_NEXT_LINE_H
+# define GET_NEXT_LINE_H
 
-// Buffer
-#ifndef BUFFER_SIZE
-#define BUFFER_SIZE 5
-#endif
+/* BUFFER*/
+# ifndef BUFFER_SIZE
+#  define BUFFER_SIZE 42
+# endif
 
-// Main
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
+/* MAIN */
 
-// Get_next_line
-#include <stdlib.h>
-#include <stddef.h>
-#include <unistd.h>
+# include <sys/types.h>
+# include <sys/stat.h>
+# include <fcntl.h>
+# include <stdio.h>
 
-// Useful fonctions
+/* GET_NEXT_LINE*/
 
-char	*ft_strdup(const char *s);
-char	*ft_strchr(const char *s, int c);
-char	*ft_strjoin(char const *s1, char const *s2);
+# include <stdlib.h>
+# include <unistd.h>
+
+char	*ft_copy_and_stick(char *buffer, char *line_read);
+char	*get_next_line(int fd);
+int		found_new_line(char *str);
+char	*buffer_after_new_line(char *buffer, int len_line_read);
+
+/*USEFUL FUNCTIONS*/
+
 size_t	ft_strlen(const char *s);
-
+void	*ft_memcpy(void *dest, const void *src, size_t n);
 #endif

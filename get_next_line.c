@@ -1,147 +1,135 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   get_next_line_new.c                                :+:      :+:    :+:   */
+/*   get_next_line.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: aceralin <aceralin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2022/08/04 14:35:42 by aceralin          #+#    #+#             */
-/*   Updated: 2022/08/09 21:24:46 by aceralin         ###   ########.fr       */
+/*   Created: 2022/08/24 17:34:45 by aceralin          #+#    #+#             */
+/*   Updated: 2022/08/30 19:05:26 by aceralin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-
-#include <stdio.h>
-#include <stdlib.h>
 #include "get_next_line.h"
-#include <limits.h>
 
-char *keep_before_new_line(char *line_read)
+char	*buffer_after_new_line(char *buffer, int to_nl)
 {
-	char *tmp;
-	int i;
-	
-	tmp = malloc( sizeof (char) * (ft_strlen(line_read)));
+	size_t	i;
+	size_t	len_after_nl;
+
 	i = 0;
-	while(line_read[i] != '\n' && line_read[i] != '\0')
+	len_after_nl = ft_strlen(&buffer[to_nl]);
+	if (len_after_nl != 0)
+		ft_memcpy(buffer, &buffer[to_nl], len_after_nl);
+	while ((i + len_after_nl) < BUFFER_SIZE && buffer[i + len_after_nl])
 	{
-		tmp[i] = line_read[i];  
+		buffer[i + len_after_nl] = '\0';
 		i++;
 	}
-	return(tmp);
-} 
-char * copy_after_new_line(char *buffer)
-{
-	int	i ;
-	int j ;
-	char *word;
-	
-	word = malloc( sizeof(char) * (BUFFER_SIZE + 1));
-	if (!word)
-		return(0);
-	i = 0;
-	j = 0;
-	while(buffer[i] && buffer [i] != '\n' )
-		i++;
-	if( buffer[i] && buffer[i] == '\n')
-		i++;
-	while (buffer[i] )
-	{
-		word[j] = buffer [i];
-		i++; 
-		j++;	
-	}
-	word[i] = '\0';
-	return(word);
+	return (buffer);
 }
 
-int	found_new_line(char *buffer)
+char	*ft_copy_and_stick(char *buffer, char *line_read)
+{
+	size_t		i;
+	size_t		len_line_read;
+	char		*stock;
+
+	len_line_read = ft_strlen(line_read);
+	i = 0;
+	while (buffer[i] != '\n' && buffer[i])
+		i++;
+	if (buffer[i] == '\n')
+		i++;
+	stock = malloc(sizeof(stock) * (len_line_read + i + 1));
+	if (!stock)
+		return (NULL);
+	stock[len_line_read + i] = '\0';
+	ft_memcpy(stock, line_read, len_line_read);
+	ft_memcpy(&stock[len_line_read], buffer, i);
+	buffer_after_new_line(buffer, i);
+	if (line_read)
+		free(line_read);
+	line_read = NULL;
+	return (stock);
+}
+
+int	found_new_line(char *str)
 {
 	int	i;
+
 	i = 0;
-	while (buffer[i])
+	if (!str)
+		return (0);
+	while (str[i])
 	{
-		if (buffer[i] == '\n')
+		if (str[i] == '\n')
 			return (1);
-		i ++;
+		i++;
 	}
 	return (0);
 }
 
-char	*ft_copy_and_stick(char *buffer, char *line_read)
-{	
-	char	*tmp;
-	
-	
-	if (line_read == NULL )
-	{
-		line_read = ft_strdup(buffer);	
-		return(line_read);
-	}
-	tmp = ft_strdup(buffer);
-	line_read = ft_strjoin(line_read, tmp);
-	
-	return (line_read);
-}
-	
 char	*get_next_line(int fd)
 {
-    char	*line_read;
-	static char	*buffer;
-	size_t	count;
-	
-	if ((fd < 0) || BUFFER_SIZE <= 0  || read(fd, buffer, 0) < 0)
+	static char	buffer[BUFFER_SIZE + 1];
+	char		*line_read;
+	int			count;
+
+	if ((fd < 0) || BUFFER_SIZE <= 0 || read(fd, buffer, 0) < 0)
 		return (NULL);
-	if(buffer == NULL)
-		buffer = malloc(sizeof(char) * (BUFFER_SIZE + 1));
-	if (!buffer)
-		return (0);
+	count = 1;
 	line_read = NULL;
-	if(found_new_line (buffer) == 1)
+	while (found_new_line(line_read) != 1 && count != 0)
 	{
-		line_read = copy_after_new_line(buffer);
-	
-		buffer = ft_strdup(line_read);
-	}	
-    while (found_new_line(buffer) == 0)
-	{
-		
-		count = read(fd, buffer, BUFFER_SIZE);
-		if (count == 0)
-			return(line_read);
-        buffer[count + 1 ] = '\0';
-        line_read = ft_copy_and_stick(buffer, line_read); 
-		if (line_read == NULL)
+		if (!buffer[0])
 		{
-			free(buffer);
-			return(NULL);
+			count = read (fd, buffer, BUFFER_SIZE);
+			buffer[count] = '\0';
 		}
-    }
-	line_read = keep_before_new_line(line_read);
-	return (line_read); 
-}
-
-int	main()
-{
-	int fd;
-    char *result;
-	fd = open("jojo", O_RDONLY);
-	int i;	
-	i = 0; 
-
-	
-	while (i != 10)
+		line_read = ft_copy_and_stick(buffer, line_read);
+		if (!line_read)
+			break ;
+	}
+	if (!line_read || !line_read[0])
 	{
-		result = get_next_line(fd);
-		printf("\nResultat final: %s\n",result);
-		free(result);
-		i++;
-	}	
-	return(0);
-	//result = get_next_line(fd);
-		
-	//printf("Par la: %s",get_next_line(fd));
-	//free(result);
-	//}	
-	//return(0);
+		free(line_read);
+		return (NULL);
+	}
+	return (line_read);
 }
+/*
+
+int main(int argc, char **argv)
+{
+    int     fd;
+	int		i;
+    char    *extract;
+
+    (void)argc;
+    (void)argv;
+	i = 0;
+    extract = "";
+    fd = open("jojo", O_RDONLY);
+    if (fd == -1)
+    {
+        printf("\n[error open()\n]");
+        return (1);
+    }
+	printf("\nopen()\n");
+    while (extract != NULL)
+	{
+		extract = get_next_line(fd);
+		printf("gnl -> %s\n", extract);
+		free(extract);
+		i++;
+	}
+	printf("i   -> %d\n", i);
+    if (close(fd) == -1)
+    {
+        printf("\n[error close()]\n");
+        return (2);
+    }
+	printf("\nclose()\n");
+    return(0);
+}*/
